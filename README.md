@@ -1,6 +1,6 @@
-# lavra-react-app
+# the-proper-channel
 
-A template app for personal projects.
+For requesting a technology be approved in your organization.
 
 ## Setup
 
