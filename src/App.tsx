@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  Link,
+  NavLink,
   Switch,
   BrowserRouter as Router,
   Route,
@@ -14,6 +14,7 @@ import { NotFound } from "./NotFound";
 import { ErrorFallback } from "./ErrorFallback";
 import { inspect } from "@xstate/inspect";
 import "@atlaskit/css-reset";
+import { Nav } from "./Nav";
 
 inspect({ url: "https://statecharts.io/inspect", iframe: false });
 
@@ -22,25 +23,19 @@ export type RoutePath = `/` | `/not-found` | `/technology/request`;
 export const App = () => (
   <ErrorBoundary FallbackComponent={ErrorFallback}>
     <Router>
-      <nav
-        css={`
-          width: 100%;
-          height: 2rem;
-        `}
-      >
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-        </ul>
-      </nav>
+      <Nav>
+        <NavLink to="/technology" exact>
+          Technology
+        </NavLink>
+        <NavLink to="/something-else">Something Else</NavLink>
+      </Nav>
       <Layout>
         <Switch>
-          <Route path="/">
-            <TechnologyPage />
+          <Route path="/" exact>
+            <Redirect to="/technology" />
           </Route>
           <Route path="/technology">
-            <Redirect to="/" />
+            <TechnologyPage />
           </Route>
           <Route path="/not-found">
             <NotFound />
