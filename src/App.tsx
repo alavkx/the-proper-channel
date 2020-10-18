@@ -1,11 +1,23 @@
 import React from "react";
-import { Link, Switch, BrowserRouter as Router, Route } from "react-router-dom";
+import {
+  Link,
+  Switch,
+  BrowserRouter as Router,
+  Route,
+  Redirect,
+} from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 // import { ReactQueryDevtools } from "react-query-devtools";
 import { Layout } from "./Layout";
-import { Home } from "./Home";
+import { TechnologyPage } from "./TechnologyPage";
 import { NotFound } from "./NotFound";
 import { ErrorFallback } from "./ErrorFallback";
+import { inspect } from "@xstate/inspect";
+import "@atlaskit/css-reset";
+
+inspect({ url: "https://statecharts.io/inspect", iframe: false });
+
+export type RoutePath = `/` | `/not-found` | `/technology/request`;
 
 export const App = () => (
   <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -25,7 +37,10 @@ export const App = () => (
       <Layout>
         <Switch>
           <Route path="/">
-            <Home />
+            <TechnologyPage />
+          </Route>
+          <Route path="/technology">
+            <Redirect to="/" />
           </Route>
           <Route path="/not-found">
             <NotFound />
