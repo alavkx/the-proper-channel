@@ -7,18 +7,20 @@ import "@reach/dialog/styles.css";
 import "./Dialog.css";
 
 interface DialogProps {
-  label?: string | React.ReactElement;
+  label: string;
+  heading?: string | React.ReactElement;
   actionButtons?: [];
   isOpen?: BaseDialogProps["isOpen"];
   onDismiss?: BaseDialogProps["onDismiss"];
 }
 export const Dialog: React.FC<DialogProps> = ({
   label,
+  heading,
   children,
   ...props
 }) => (
-  <BaseDialog {...props}>
-    {typeof label === "string" ? <h1>{label}</h1> : label}
+  <BaseDialog {...props} aria-label={label}>
+    {typeof heading === "string" ? <h1>{heading}</h1> : heading}
     {children}
   </BaseDialog>
 );

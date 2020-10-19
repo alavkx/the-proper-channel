@@ -2,13 +2,11 @@ import React from "react";
 import { useQuery, useMutation } from "react-query";
 import { api, Technology } from "./api";
 import Spinner from "@atlaskit/spinner";
-import Button from "@atlaskit/button";
+import Button, { LoadingButton } from "@atlaskit/button";
 import { useHistory } from "react-router-dom";
 import { Dialog } from "./Dialog";
 import { fullBleed } from "./Layout";
 import { useRouteMatch } from "react-router-dom";
-import { Machine, assign } from "xstate";
-import { useMachine } from "@xstate/react";
 
 export const TechnologyPage = () => {
   const { data, status } = useQuery(`technology`, () => api(`/technology`));
@@ -18,7 +16,7 @@ export const TechnologyPage = () => {
     <>
       {status === `success` ? (
         <Table css={fullBleed as any}>
-          {data?.map((props) => (
+          {data?.map(({ ...props }) => (
             <Row {...props} />
           ))}
         </Table>
@@ -28,6 +26,7 @@ export const TechnologyPage = () => {
       <Dialog
         isOpen={!!match?.url}
         label="Request a technology"
+        heading="Request a technology"
         onDismiss={() => history.push(`/technology`)}
       >
         <TechnologyRequestForm />
@@ -101,61 +100,94 @@ const Row: React.FC<Technology> = ({
     <td>{language}</td>
   </tr>
 );
+type TechnologyFields = Pick<Technology, "name" | "repo" | "language">;
+type Event = {
+  type: "CHANGE_NAME" | "CHANGE_REPO" | "CHANGE_LANGUAGE";
+  payload: string;
+};
+const initializer = (): TechnologyFields => ({
+  name: "",
+  repo: "",
+  language: "",
+});
 const TechnologyRequestForm: React.FC = () => {
-  const [mutate] = useMutation((data: Technology) =>
-    api(`/technology`, { method: "POST", body: JSON.stringify(data) }),
+  const history = useHistory();
+  const [mutate, { status }] = useMutation(
+    (fields: TechnologyFields) =>
+      api(`/technology`, { method: "POST", body: JSON.stringify(fields) }),
+    { onSuccess: () => history.push(`/technology`) },
   );
-  const [state, send] = useMachine(technologyRequestMachine, {
-    services: { submit: mutate },
-  });
+  const [fields, dispatch] = React.useReducer(
+    (state: TechnologyFields, event: Event) => {
+      switch (event.type) {
+        case "CHANGE_NAME":
+          return { ...state, name: event.payload };
+        case "CHANGE_REPO":
+          return { ...state, repo: event.payload };
+        case "CHANGE_LANGUAGE":
+          return { ...state, language: event.payload };
+      }
+    },
+    initializer(),
+    initializer,
+  );
   return (
-    <form>
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        mutate(fields);
+      }}
+      css={`
+        display: flex;
+        flex-flow: column;
+        label {
+          display: block;
+        }
+        input {
+          display: block;
+        }
+      `}
+    >
       <label>
         Name
         <input
+          required
           onChange={(e) =>
-            send({ type: "CHANGE", payload: { name: e.target.value } })
+            dispatch({ type: "CHANGE_NAME", payload: e.target.value })
           }
-          value={state.context.name}
+          value={fields.name}
         />
       </label>
+      <label>
+        Repository URL
+        <input
+          required
+          onChange={(e) =>
+            dispatch({ type: "CHANGE_REPO", payload: e.target.value })
+          }
+          value={fields.repo}
+        />
+      </label>
+      <label>
+        Language
+        <input
+          required
+          onChange={(e) =>
+            dispatch({ type: "CHANGE_LANGUAGE", payload: e.target.value })
+          }
+          value={fields.language}
+        />
+      </label>
+      <LoadingButton
+        type="submit"
+        appearance="primary"
+        css={`
+          margin-top: 32px;
+        `}
+        isLoading={status === "loading"}
+      >
+        Submit
+      </LoadingButton>
     </form>
   );
 };
-
-const technologyRequestMachine = Machine(
-  {
-    id: "technologyRequest",
-    initial: "pristine",
-    context: {
-      name: undefined,
-      repo: undefined,
-      language: undefined,
-    },
-    states: {
-      pristine: {
-        on: {
-          CHANGE: { target: "dirty", actions: "change" },
-        },
-      },
-      dirty: {
-        on: {
-          SUBMIT: { target: "submitting" },
-        },
-      },
-      submitting: {
-        invoke: {
-          src: "submit",
-          onDone: "pristine",
-        },
-      },
-    },
-  },
-  {
-    actions: {
-      change: assign((context, event) => ({
-        [event.payload.name]: event.payload.value,
-      })),
-    },
-  },
-);
