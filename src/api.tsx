@@ -10,8 +10,8 @@ export type Technology = {
   createdAt: string;
   updatedAt: string;
   approvalStatus: ApprovalStatus;
+  id: string;
 };
-
 export type Api = {
   [`/technology`]: Technology[];
 };
