@@ -111,7 +111,13 @@ const TechnologyRequestForm: React.FC = () => {
   return (
     <form>
       <label>
-        <input />
+        Name
+        <input
+          onChange={(e) =>
+            send({ type: "CHANGE", payload: { name: e.target.value } })
+          }
+          value={state.context.name}
+        />
       </label>
     </form>
   );
@@ -153,49 +159,3 @@ const technologyRequestMachine = Machine(
     },
   },
 );
-
-// const fieldMachine = Machine({
-//   id: "field",
-//   initial: "pristine",
-//   states: {
-//     valid: {
-//       initial: "pristine",
-//       states: {
-//         pristine: {
-//           on: {
-//             CHANGE: { target: "dirty", actions: "change" },
-//           },
-//         },
-//         dirty: {},
-//       },
-//     },
-//     invalid: {
-//       initial: "pristine",
-//       states: {
-//         pristine: {},
-//         dirty: {},
-//       },
-//     },
-//   },
-// });
-// const formMachine = Machine({
-//   id: "form",
-//   initial: "pristine",
-//   states: {
-//     pristine: {},
-//     dirty: {},
-//     busy: {},
-//   },
-// });
-// interface TextField {
-//   name: string;
-//   defaultValue: string;
-// }
-// type Field = TextField;
-// interface UseFormProps {
-//   fields: Record<string, Field>;
-// }
-// const useForm = ({ fields }: UseFormProps) => {
-//   const [state, send, service] = useMachine(formMachine);
-//   return [state, send, service];
-// };
