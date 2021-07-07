@@ -1,31 +1,41 @@
 import React from "react";
-import { Link, Switch, BrowserRouter as Router, Route } from "react-router-dom";
+import {
+  NavLink,
+  Switch,
+  BrowserRouter as Router,
+  Route,
+  Redirect,
+} from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 // import { ReactQueryDevtools } from "react-query-devtools";
 import { Layout } from "./Layout";
-import { Home } from "./Home";
+import { TechnologyPage } from "./TechnologyPage";
 import { NotFound } from "./NotFound";
 import { ErrorFallback } from "./ErrorFallback";
+import { inspect } from "@xstate/inspect";
+import "@atlaskit/css-reset";
+import { Nav } from "./Nav";
+
+inspect({ url: "https://statecharts.io/inspect", iframe: false });
+
+export type RoutePath = `/` | `/not-found` | `/technology/request`;
 
 export const App = () => (
   <ErrorBoundary FallbackComponent={ErrorFallback}>
     <Router>
-      <nav
-        css={`
-          width: 100%;
-          height: 2rem;
-        `}
-      >
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-        </ul>
-      </nav>
+      <Nav>
+        <NavLink to="/technology" exact>
+          Technology
+        </NavLink>
+        <NavLink to="/something-else">Something Else</NavLink>
+      </Nav>
       <Layout>
         <Switch>
-          <Route path="/">
-            <Home />
+          <Route path="/" exact>
+            <Redirect to="/technology" />
+          </Route>
+          <Route path="/technology">
+            <TechnologyPage />
           </Route>
           <Route path="/not-found">
             <NotFound />
